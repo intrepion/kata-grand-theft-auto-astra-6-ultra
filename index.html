@@ -16,7 +16,7 @@
   <body>
     <canvas
       id="game"
-      aria-label="Vice District open city driving game"
+      aria-label="Vice District third-person open city driving game"
     ></canvas>
     <div class="vignette" aria-hidden="true"></div>
 
@@ -121,8 +121,42 @@
       </aside>
 
       <div class="world-caption" aria-hidden="true">
-        <span>WELCOME TO THE NEIGHBORHOOD</span
-        ><strong>A different kind of rush.</strong>
+        <span>STREET LEVEL / THIRD-PERSON</span
+        ><strong>Closer to the action.</strong>
+      </div>
+
+      <div class="camera-controls" aria-label="Camera controls">
+        <button
+          id="camera-reset"
+          class="camera-reset"
+          aria-label="Recenter camera behind your character or car"
+          title="Recenter camera (C)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M7 4H4v3m13-3h3v3M4 17v3h3m13-3v3h-3"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="4"
+              stroke="currentColor"
+              stroke-width="1.6"
+            />
+            <circle cx="12" cy="12" r="1" fill="currentColor" />
+          </svg>
+          <span>RECENTER <kbd>C</kbd></span>
+        </button>
+        <span class="camera-hint camera-hint-desktop"
+          >DRAG TO LOOK · SCROLL TO ZOOM</span
+        >
+        <span class="camera-hint camera-hint-touch"
+          >DRAG THE SCENE TO LOOK</span
+        >
       </div>
 
       <aside class="map-card panel" aria-label="City map">
@@ -174,6 +208,7 @@
         <div class="control-row">
           <kbd>E</kbd><span>Enter / Exit vehicle</span>
         </div>
+        <div class="control-row"><kbd>C</kbd><span>Recenter camera</span></div>
         <button id="help-button" class="controls-help">
           <span>?</span> ALL CONTROLS <span>↗</span>
         </button>
@@ -226,13 +261,13 @@
           <span class="orange-dot"></span> WELCOME TO VICE DISTRICT
           <span>01 / 01</span>
         </div>
-        <p class="welcome-kicker">NO SCHEDULE. NO SPEED LIMIT.</p>
+        <p class="welcome-kicker">THIRD-PERSON. OPEN WORLD.</p>
         <h2 id="welcome-title">
           The city<br />is <em>yours.</em><span>↗</span>
         </h2>
         <p class="welcome-copy">
-          Find a ride. Chase an opportunity. Take the long way home. Your next
-          story is just around the corner.
+          Hit the city at street level. Find a ride. Chase an opportunity. Drag
+          the scene to look around as you explore.
         </p>
         <div class="welcome-features">
           <span><i>01</i> EXPLORE THE CITY</span
@@ -268,6 +303,9 @@
         ><button id="reset-button" class="secondary-button">
           RECOVER AT GARAGE · $250
         </button>
+        <button id="pause-help" class="secondary-button">
+          CAMERA &amp; ALL CONTROLS
+        </button>
         <p class="modal-footnote">Press P or Escape to resume</p>
       </div>
     </section>
@@ -296,7 +334,22 @@
               <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>↑</kbd
               ><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd>
             </dt>
-            <dd>Move on foot or drive your ride</dd>
+            <dd>
+              Walk relative to your view; accelerate, reverse, and steer your
+              car
+            </dd>
+          </div>
+          <div>
+            <dt>DRAG / SWIPE</dt>
+            <dd>Look around your character or car</dd>
+          </div>
+          <div>
+            <dt>SCROLL WHEEL</dt>
+            <dd>Move the camera closer or farther away</dd>
+          </div>
+          <div>
+            <dt><kbd>C</kbd> / RECENTER</dt>
+            <dd>Return the camera behind you</dd>
           </div>
           <div>
             <dt><kbd>E</kbd></dt>
@@ -324,6 +377,11 @@
           the orange markers to complete jobs and earn cash. A little chaos
           attracts the police — keep moving and stay out of sight to lose the
           heat.
+        </p>
+        <p class="help-touch-tip">
+          <strong>ON TOUCHSCREENS</strong> Hold the arrow buttons to move and
+          drag the scene with another finger to look around. Tap the camera
+          button to recenter.
         </p>
         <button id="help-done" class="primary-button">
           GOT IT. LET’S GO. <span>↗</span>

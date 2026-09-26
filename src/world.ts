@@ -5,6 +5,7 @@ export type Obstacle = {
   maxX: number;
   minZ: number;
   maxZ: number;
+  maxY?: number;
 };
 
 export interface CityWorld {
@@ -23,6 +24,31 @@ type Part = {
   rotation: THREE.Euler;
   color: THREE.Color;
 };
+
+const BLOCK_CENTERS = [-72, -24, 24, 72];
+
+/** Top of the walkable paving; buildings and props remain collision obstacles. */
+export function groundHeight(x: number, z: number): number {
+  if (Math.abs(x) >= 103.5 || Math.abs(z) >= 103.5) return 0.405;
+  for (const centerX of BLOCK_CENTERS)
+    for (const centerZ of BLOCK_CENTERS) {
+      const dx = Math.abs(x - centerX);
+      const dz = Math.abs(z - centerZ);
+      if (dx > 17 || dz > 17) continue;
+      let height = dx <= 15.9 && dz <= 15.9 ? 0.4525 : 0.425;
+      const isPlaza =
+        (centerX === 24 && centerZ === 24) ||
+        (centerX === -72 && centerZ === 72);
+      if (isPlaza) {
+        if (dx <= 14.7 && dz <= 14.7) height = 0.51;
+        if ((dx <= 2.5 && dz <= 14.85) || (dz <= 2.5 && dx <= 14.85))
+          height = 0.545;
+        if (Math.abs(dx - 9) <= 4.7 && Math.abs(dz - 9) <= 4.7) height = 0.675;
+      }
+      return height;
+    }
+  return 0.175;
+}
 
 /** A small, deliberately hand-composed island, with instancing for its street details. */
 export function createWorld(scene: THREE.Scene): CityWorld {
@@ -72,14 +98,12 @@ export function createWorld(scene: THREE.Scene): CityWorld {
   ) {
     if (!batches.has(kind))
       batches.set(kind, { geometry, parts: [], roughness: 0.88, metalness: 0 });
-    batches
-      .get(kind)!
-      .parts.push({
-        position: new THREE.Vector3(x, y, z),
-        scale: new THREE.Vector3(sx, sy, sz),
-        rotation: new THREE.Euler(0, ry, rz),
-        color: new THREE.Color(color),
-      });
+    batches.get(kind)!.parts.push({
+      position: new THREE.Vector3(x, y, z),
+      scale: new THREE.Vector3(sx, sy, sz),
+      rotation: new THREE.Euler(0, ry, rz),
+      color: new THREE.Color(color),
+    });
   }
   function cube(
     x: number,
@@ -104,12 +128,13 @@ export function createWorld(scene: THREE.Scene): CityWorld {
   ) {
     part("cylinders", cylinder, x, y, z, sx, sy, sz, color);
   }
-  function solid(x: number, z: number, w: number, d: number) {
+  function solid(x: number, z: number, w: number, d: number, height = 3) {
     obstacles.push({
       minX: x - w / 2,
       maxX: x + w / 2,
       minZ: z - d / 2,
       maxZ: z + d / 2,
+      maxY: height,
     });
   }
   let randomState = 32197;
@@ -140,7 +165,7 @@ export function createWorld(scene: THREE.Scene): CityWorld {
   }
 
   // Every lot has its own raised sidewalk, leaving uninterrupted driving lanes.
-  const centers = [-72, -24, 24, 72];
+  const centers = BLOCK_CENTERS;
   for (const x of centers)
     for (const z of centers) {
       cube(x, 0.2, z, 34, 0.45, 34, "#eee0ca");
@@ -350,7 +375,7 @@ export function createWorld(scene: THREE.Scene): CityWorld {
     roof: string,
     style = 0,
   ) {
-    solid(x, z, w + 0.35, d + 0.35);
+    solid(x, z, w + 0.35, d + 0.35, h + 1.5);
     cube(x, h / 2 + 0.47, z, w, h, d, color);
     cube(x, 0.81, z, w + 0.35, 0.55, d + 0.35, "#c5b6a4");
     cube(x, h + 0.65, z, w + 0.5, 0.46, d + 0.5, "#f3dfc2");
@@ -449,12 +474,12 @@ export function createWorld(scene: THREE.Scene): CityWorld {
       cyl(x, 1.98, z, 3.7, 0.08, 3.7, "#8ed2d0");
       cyl(x, 2.65, z, 0.48, 1.3, 0.48, "#a9e0d7");
       part("fountain", sphere, x, 3.34, z, 0.8, 0.7, 0.8, "#b3e6de");
-      solid(x, z, 6.6, 6.6);
+      solid(x, z, 6.6, 6.6, 3.7);
     } else {
       cube(x, 0.61, z, 11, 0.18, 11, "#d49980");
       cyl(x, 1.9, z, 1.5, 2.5, 1.5, "#dcc7a6");
       part("sculpture", cone, x, 4.15, z, 3.7, 3.2, 3.7, "#427e7b", 0.4);
-      solid(x, z, 2, 2);
+      solid(x, z, 2, 2, 5.8);
     }
     bench(x - 5.3, z + 4.6, -Math.PI / 2);
     bench(x + 5.3, z - 4.6, Math.PI / 2);

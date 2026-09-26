@@ -1,6 +1,6 @@
 # Vice District
 
-An original GTA-inspired arcade sandbox: explore a sunlit coastal city, borrow a car, lose the police, and make your next delivery. Built with TypeScript, Three.js, and Vite, with a procedural 3D city, traffic, pedestrians, vehicle handling, police pursuit, missions, and a live minimap.
+An original GTA-inspired arcade sandbox: explore a sunlit coastal city, borrow a car, lose the police, and make your next delivery. A street-level third-person camera follows behind your character on foot and becomes a chase camera while driving. Built with TypeScript, Three.js, and Vite, with a procedural 3D city, traffic, pedestrians, vehicle handling, police pursuit, missions, and a live minimap.
 
 ![Vice District gameplay](artifacts/gameplay.png)
 
@@ -23,6 +23,7 @@ npm run preview     # Serve the production build locally
 npm test            # Run game-mechanics tests
 npx playwright install chromium
 npm run test:e2e    # Run browser gameplay tests
+UPDATE_SCREENSHOTS=1 npm run test:e2e # Refresh the checked-in game screenshots
 ```
 
 ## Controls
@@ -30,6 +31,9 @@ npm run test:e2e    # Run browser gameplay tests
 | Control           | Action                                                                           |
 | ----------------- | -------------------------------------------------------------------------------- |
 | WASD / arrow keys | Walk relative to the camera; accelerate, reverse, and steer relative to your car |
+| Drag the scene    | Orbit the camera around your character or car                                    |
+| Scroll wheel      | Zoom the camera closer or farther away                                           |
+| C / camera button | Recenter the camera behind your character or car                                 |
 | E                 | Enter a nearby car, or exit after slowing down                                   |
 | Space             | Handbrake                                                                        |
 | Shift             | Sprint on foot / boost while driving                                             |
@@ -37,7 +41,9 @@ npm run test:e2e    # Run browser gameplay tests
 | Escape / P        | Pause or resume                                                                  |
 | Speaker button    | Enable or mute sound                                                             |
 
-Touchscreens also have directional, enter/exit, and brake buttons. The **All controls** button opens the in-game guide.
+Touchscreens also have directional, enter/exit, and brake buttons. Hold a direction with one finger and drag the scene with another to look around while moving. Tap **Recenter** to return the camera behind your character or car. The **All controls** button opens the in-game guide; on smaller screens, open it from the pause menu.
+
+For example, while walking down a street, drag to look toward the orange Comet GT and hold **W** to walk toward that view. After entering it, **W** accelerates in the car's direction and **A / D** steer. You can look around independently, then press **C** to restore the view behind the car.
 
 ## Your first job
 

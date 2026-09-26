@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import "./style.css";
-import { createWorld } from "./world";
+import { createWorld, groundHeight } from "./world";
 import { createCar, createPerson, createMarker } from "./models";
 import { HUD } from "./hud";
 import { GameAudio } from "./audio";
+import { ThirdPersonCamera } from "./camera";
+import { createAtmosphere } from "./atmosphere";
 import {
   advanceDriving,
   advanceHeat,
@@ -54,8 +56,8 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.22;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color("#70b8bb");
-scene.fog = new THREE.Fog("#91bfc0", 190, 410);
+scene.background = new THREE.Color("#bbd7df");
+scene.fog = new THREE.Fog("#d5dfda", 130, 390);
 scene.add(new THREE.HemisphereLight("#fff4dd", "#6d9197", 2.8));
 const sun = new THREE.DirectionalLight("#ffdeb8", 3.2);
 sun.position.set(-85, 130, 55);
@@ -73,9 +75,9 @@ sun.shadow.bias = -0.00035;
 sun.shadow.normalBias = 0.07;
 scene.add(sun);
 const world = createWorld(scene);
-const camera = new THREE.OrthographicCamera(-70, 70, 50, -50, 0.1, 650);
-const cameraTarget = world.spawn.clone();
-const cameraOffset = new THREE.Vector3(58, 88, 74);
+createAtmosphere(scene);
+const cameraRig = new ThirdPersonCamera(world.obstacles);
+const camera = cameraRig.camera;
 
 let saved = parseSave(null);
 try {
@@ -104,24 +106,15 @@ const audio = new GameAudio();
 const pressed = new Set<string>();
 const player = createPerson(0xf16d45);
 player.position.copy(world.spawn);
+player.position.y = groundHeight(player.position.x, player.position.z) + 0.02;
+player.rotation.y = Math.PI;
+cameraRig.reset(player.position, player.rotation.y);
 scene.add(player);
 const marker = createMarker(0xffae48);
 scene.add(marker);
 const garageMarker = createMarker(0x62dfbd);
 garageMarker.position.copy(world.garage);
 scene.add(garageMarker);
-const playerRing = new THREE.Mesh(
-  new THREE.RingGeometry(1.05, 1.2, 32),
-  new THREE.MeshBasicMaterial({
-    color: 0xffe8b0,
-    transparent: true,
-    opacity: 0.9,
-    depthWrite: false,
-  }),
-);
-playerRing.rotation.x = -Math.PI / 2;
-scene.add(playerRing);
-
 const cars: Car[] = [];
 const policePool: Car[] = [];
 const pedestrians: {
@@ -215,7 +208,11 @@ for (let i = 0; i < 32; i++) {
   };
   if (isBlocked(origin, 0.5, world.obstacles, world.bounds)) continue;
   const mesh = createPerson([0xffd17a, 0x2d7880, 0xc95b52, 0xf7efda][i % 4]);
-  mesh.position.set(origin.x, 0.1, origin.z);
+  mesh.position.set(
+    origin.x,
+    groundHeight(origin.x, origin.z) + 0.02,
+    origin.z,
+  );
   scene.add(mesh);
   pedestrians.push({ mesh, origin, axis, phase: random() * 6.28 });
 }
@@ -279,7 +276,8 @@ function interact(): void {
       hud.toast("The doors are blocked. Move the car into the street.");
       return;
     }
-    player.position.set(exit.x, 0.1, exit.z);
+    player.position.set(exit.x, groundHeight(exit.x, exit.z) + 0.02, exit.z);
+    player.rotation.y = angle;
     player.visible = true;
     activeCar.state.speed = 0;
     activeCar = null;
@@ -338,8 +336,9 @@ function recover(busted: boolean): void {
     activeCar = null;
   } else player.position.copy(world.spawn);
   player.visible = true;
+  player.position.y = groundHeight(player.position.x, player.position.z) + 0.02;
   missionStep = 0;
-  cameraTarget.copy(position());
+  cameraRig.reset(position(), player.rotation.y);
   pressed.clear();
   save();
   hud.showResult(
@@ -547,9 +546,8 @@ function updatePlayer(dt: number): void {
     }
     player.position.copy(car.mesh.position);
   } else {
-    // Walking is camera-relative, so W always moves toward the top of the screen.
-    const dx = -forward * 0.617 - turn * 0.787;
-    const dz = -forward * 0.787 + turn * 0.617;
+    // Walking follows the view direction, including after orbiting the camera.
+    const { x: dx, z: dz } = cameraRig.movement(forward, turn);
     const length = Math.hypot(dx, dz);
     const speed = pressed.has("shift") ? 11 : 6.5;
     if (length) {
@@ -561,16 +559,18 @@ function updatePlayer(dt: number): void {
         world.obstacles,
         world.bounds,
       );
-      player.rotation.y = Math.atan2(dx, dz);
+      player.rotation.y +=
+        wrapAngle(Math.atan2(dx, dz) - player.rotation.y) *
+        (1 - Math.exp(-dt * 14));
     }
     animatePerson(
       player,
       length ? gameTime * (pressed.has("shift") ? 16 : 11) : 0,
       length ? 0.55 : 0,
     );
+    player.position.y =
+      groundHeight(player.position.x, player.position.z) + 0.02;
   }
-  playerRing.visible = !activeCar;
-  playerRing.position.set(player.position.x, 0.22, player.position.z);
 }
 
 function animatePerson(
@@ -611,7 +611,11 @@ function updateTraffic(dt: number): void {
     const stride = Math.sin(gameTime * 0.25 + ped.phase) * 9;
     const next = { ...ped.origin, [ped.axis]: ped.origin[ped.axis] + stride };
     if (!isBlocked(next, 0.45, world.obstacles, world.bounds)) {
-      ped.mesh.position.set(next.x, 0.1, next.z);
+      ped.mesh.position.set(
+        next.x,
+        groundHeight(next.x, next.z) + 0.02,
+        next.z,
+      );
       const dir = Math.cos(gameTime * 0.25 + ped.phase) > 0 ? 1 : -1;
       ped.mesh.rotation.y =
         ped.axis === "x" ? (dir * Math.PI) / 2 : dir > 0 ? 0 : Math.PI;
@@ -833,6 +837,7 @@ const validKeys = new Set([
   "shift",
   "e",
   "r",
+  "c",
   "escape",
   "p",
 ]);
@@ -842,10 +847,11 @@ window.addEventListener("keydown", (e) => {
   if (!validKeys.has(key)) return;
   if (key === " " && (e.target as HTMLElement)?.closest("button")) return;
   e.preventDefault();
-  if (e.repeat && ["e", "r", "escape", "p"].includes(key)) return;
+  if (e.repeat && ["e", "r", "c", "escape", "p"].includes(key)) return;
   if (key === "escape" || key === "p") togglePause();
   else if (key === "e") interact();
   else if (key === "r" && started && !paused) recover(false);
+  else if (key === "c" && started && !paused) resetView();
   else if (!paused) pressed.add(key);
 });
 window.addEventListener("keyup", (e) => pressed.delete(e.key.toLowerCase()));
@@ -868,15 +874,56 @@ for (const button of document.querySelectorAll<HTMLElement>("[data-control]")) {
     button.addEventListener(event, () => pressed.delete(key));
 }
 
+function resetView(): void {
+  cameraRig.recenter(activeCar?.state.angle ?? player.rotation.y);
+}
+document.getElementById("camera-reset")?.addEventListener("click", () => {
+  if (started && !paused) resetView();
+});
+let lookPointer: number | null = null;
+let pointerX = 0,
+  pointerY = 0;
+canvas.addEventListener("pointerdown", (event) => {
+  if (
+    !started ||
+    paused ||
+    lookPointer !== null ||
+    ![0, 2].includes(event.button)
+  )
+    return;
+  event.preventDefault();
+  lookPointer = event.pointerId;
+  pointerX = event.clientX;
+  pointerY = event.clientY;
+  canvas.setPointerCapture(event.pointerId);
+  canvas.classList.add("looking");
+});
+canvas.addEventListener("pointermove", (event) => {
+  if (lookPointer !== event.pointerId) return;
+  if (!paused)
+    cameraRig.orbit(event.clientX - pointerX, event.clientY - pointerY);
+  pointerX = event.clientX;
+  pointerY = event.clientY;
+});
+for (const event of ["pointerup", "pointercancel", "lostpointercapture"]) {
+  canvas.addEventListener(event, () => {
+    lookPointer = null;
+    canvas.classList.remove("looking");
+  });
+}
+canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+canvas.addEventListener(
+  "wheel",
+  (event) => {
+    event.preventDefault();
+    if (started && !paused) cameraRig.zoom(event.deltaY);
+  },
+  { passive: false },
+);
+
 function resize(): void {
   renderer.setSize(window.innerWidth, window.innerHeight);
-  const aspect = window.innerWidth / window.innerHeight;
-  const height = window.innerWidth < 700 ? 110 : 100;
-  camera.left = (-height * aspect) / 2;
-  camera.right = (height * aspect) / 2;
-  camera.top = height / 2;
-  camera.bottom = -height / 2;
-  camera.updateProjectionMatrix();
+  cameraRig.resize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener("resize", resize);
 resize();
@@ -901,19 +948,28 @@ function frame(now: number): void {
     marker.rotation.y = gameTime * 0.65;
     marker.position.y = Math.sin(gameTime * 2.6) * 0.35;
   }
-  const p = position();
-  const look = new THREE.Vector3(p.x, p.y, p.z);
-  if (activeCar)
-    look.add(
-      new THREE.Vector3(
-        Math.sin(activeCar.state.angle),
-        0,
-        Math.cos(activeCar.state.angle),
-      ).multiplyScalar(activeCar.state.speed * 0.2),
+  if (!paused || !started)
+    cameraRig.update(
+      {
+        position: position(),
+        heading: activeCar?.state.angle ?? player.rotation.y,
+        driving: !!activeCar,
+        speed: activeCar?.state.speed ?? 0,
+        moving: activeCar
+          ? Math.abs(activeCar.state.speed) > 0.5
+          : [
+              "w",
+              "a",
+              "s",
+              "d",
+              "arrowup",
+              "arrowdown",
+              "arrowleft",
+              "arrowright",
+            ].some((key) => pressed.has(key)),
+      },
+      dt,
     );
-  cameraTarget.lerp(look, 1 - Math.exp(-dt * 3));
-  camera.position.copy(cameraTarget).add(cameraOffset);
-  camera.lookAt(cameraTarget);
   audio.update(activeCar?.state.speed ?? 0, !!activeCar, paused);
   hudTimer += dt;
   if (hudTimer > 0.09) {
@@ -944,10 +1000,22 @@ if (import.meta.env.DEV && new URLSearchParams(location.search).has("test")) {
         z: position().z,
         speed: activeCar?.state.speed ?? 0,
         drawCalls: renderer.info.render.calls,
+        heading: activeCar?.state.angle ?? player.rotation.y,
+        cameraType: camera.type,
+        cameraYaw: cameraRig.yaw,
+        cameraX: camera.position.x,
+        cameraY: camera.position.y,
+        cameraZ: camera.position.z,
+        cameraFov: camera.fov,
       }),
       teleport: (x: number, z: number) => {
         position().set(x, 0.1, z);
         if (activeCar) activeCar.state.speed = 0;
+        cameraRig.reset(
+          position(),
+          activeCar?.state.angle ?? player.rotation.y,
+          !!activeCar,
+        );
       },
       clearHeat: () => {
         heat.wanted = 0;

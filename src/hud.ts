@@ -101,6 +101,9 @@ export class HUD {
       if (this.resumeAfterHelp) actions.togglePause();
       element("close-help").focus();
     });
+    element("pause-help").addEventListener("click", () =>
+      element("help-button").click(),
+    );
     element("close-help").addEventListener("click", () => this.closeHelp());
     element("help-done").addEventListener("click", () => this.closeHelp());
     element("reset-button").addEventListener("click", () => {

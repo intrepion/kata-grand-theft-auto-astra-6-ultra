@@ -14,6 +14,13 @@ interface Snapshot {
   z: number;
   speed: number;
   drawCalls: number;
+  heading: number;
+  cameraType: string;
+  cameraYaw: number;
+  cameraX: number;
+  cameraY: number;
+  cameraZ: number;
+  cameraFov: number;
 }
 interface TestControls {
   snapshot(): Snapshot;
@@ -29,10 +36,18 @@ declare global {
 }
 
 const snapshot = (page: Page) => page.evaluate(() => window.__vice.snapshot());
-async function start(page: Page): Promise<void> {
+async function start(page: Page, capture = false): Promise<void> {
   await page.goto("/?test=1");
+  if (capture && process.env.UPDATE_SCREENSHOTS)
+    await page.screenshot({ path: "artifacts/welcome.png" });
   await page.getByRole("button", { name: "HIT THE STREETS" }).click();
   await expect.poll(async () => (await snapshot(page)).started).toBe(true);
+  if (capture && process.env.UPDATE_SCREENSHOTS) {
+    await expect(page.locator("#toast-region .toast")).toHaveCount(0, {
+      timeout: 10000,
+    });
+    await page.screenshot({ path: "artifacts/gameplay.png" });
+  }
 }
 
 test("city renders, the player takes a car, drives, brakes, and exits", async ({
@@ -40,9 +55,10 @@ test("city renders, the player takes a car, drives, brakes, and exits", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await start(page);
+  await start(page, true);
   const initial = await snapshot(page);
   expect(initial.onFoot).toBe(true);
+  expect(initial.cameraType).toBe("PerspectiveCamera");
   expect(initial.drawCalls).toBeGreaterThan(10);
   await page.keyboard.press("e");
   await expect.poll(async () => (await snapshot(page)).onFoot).toBe(false);
@@ -56,6 +72,14 @@ test("city renders, the player takes a car, drives, brakes, and exits", async ({
     .poll(async () => (await snapshot(page)).speed)
     .toBeGreaterThan(10);
   await page.keyboard.up("w");
+  await expect
+    .poll(async () => {
+      const current = await snapshot(page);
+      return Math.cos(current.cameraYaw - current.heading);
+    })
+    .toBeGreaterThan(0.9);
+  if (process.env.UPDATE_SCREENSHOTS)
+    await page.screenshot({ path: "artifacts/driving.png" });
   expect((await snapshot(page)).z).toBeGreaterThan(initial.z + 2);
   await page.keyboard.press("e");
   expect((await snapshot(page)).onFoot).toBe(false);
@@ -65,6 +89,57 @@ test("city renders, the player takes a car, drives, brakes, and exits", async ({
   await page.keyboard.press("e");
   await expect.poll(async () => (await snapshot(page)).onFoot).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test("street-level camera orbits and walking follows the new view direction", async ({
+  page,
+}) => {
+  await start(page);
+  const initial = await snapshot(page);
+  expect(initial.cameraType).toBe("PerspectiveCamera");
+  expect(initial.cameraY).toBeLessThan(8);
+  expect(initial.cameraY).toBeGreaterThan(1);
+  expect(initial.cameraZ).toBeGreaterThan(initial.z);
+  await page.mouse.move(900, 440);
+  await page.mouse.down();
+  await page.mouse.move(1030, 470, { steps: 8 });
+  await page.mouse.up();
+  const orbited = await snapshot(page);
+  expect(
+    Math.abs(Math.sin(orbited.cameraYaw - initial.cameraYaw)),
+  ).toBeGreaterThan(0.25);
+  await page.keyboard.down("w");
+  await expect
+    .poll(async () => {
+      const moved = await snapshot(page);
+      return Math.hypot(moved.x - orbited.x, moved.z - orbited.z);
+    })
+    .toBeGreaterThan(1.3);
+  await page.keyboard.up("w");
+  const moved = await snapshot(page);
+  const dx = moved.x - orbited.x,
+    dz = moved.z - orbited.z;
+  const alignment =
+    (dx * Math.sin(orbited.cameraYaw) + dz * Math.cos(orbited.cameraYaw)) /
+    Math.hypot(dx, dz);
+  expect(alignment).toBeGreaterThan(0.98);
+
+  await page.mouse.move(900, 440);
+  await page.mouse.down();
+  await page.mouse.move(1080, 440, { steps: 8 });
+  await page.mouse.up();
+  await page.keyboard.press("c");
+  await expect
+    .poll(async () => {
+      const current = await snapshot(page);
+      return Math.cos(current.cameraYaw - current.heading);
+    })
+    .toBeGreaterThan(0.99);
+  await page.keyboard.press("Escape");
+  const paused = await snapshot(page);
+  await page.mouse.move(900, 440);
+  await page.mouse.wheel(0, 200);
+  expect((await snapshot(page)).cameraYaw).toBe(paused.cameraYaw);
 });
 
 test("pause freezes movement and help resumes cleanly", async ({ page }) => {
@@ -176,5 +251,7 @@ test("mobile layout fits the screen and touch controls move the character", asyn
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
   expect(errors).toEqual([]);
+  if (process.env.UPDATE_SCREENSHOTS)
+    await page.screenshot({ path: "artifacts/mobile.png" });
   await context.close();
 });
