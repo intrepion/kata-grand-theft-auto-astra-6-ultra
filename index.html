@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f4f0e6" />
+    <meta
+      name="description"
+      content="A little city. A lot of possibility. Explore Vice District, an original open-city driving game."
+    />
+    <title>Vice District — The city is yours.</title>
+  </head>
+  <body>
+    <canvas
+      id="game"
+      aria-label="Vice District open city driving game"
+    ></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <main id="hud" class="hud" aria-label="Game dashboard">
+      <header class="topbar">
+        <a class="wordmark" href="./" aria-label="Vice District home"
+          ><span class="wordmark-vice">VICE</span
+          ><span class="wordmark-district"
+            >DISTRICT<span class="wordmark-tagline"
+              >AN OPEN WORLD. YOUR RULES.</span
+            ></span
+          ><span class="live-badge"><i></i> LIVE</span></a
+        >
+        <div class="location">
+          <span class="location-dot" aria-hidden="true">⌖</span>
+          <div>
+            <span id="district">DOWNTOWN</span
+            ><small>FREE ROAM <span>·</span> 16:42</small>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="player-wallet">
+            <span class="small-label">CASH ON HAND</span
+            ><strong id="cash">$2,500</strong>
+          </div>
+          <div class="status-divider"></div>
+          <div class="wanted-group">
+            <span class="small-label">WANTED LEVEL</span>
+            <div
+              id="wanted"
+              class="wanted-stars"
+              aria-label="Wanted level 0 of 5"
+            >
+              <span>★</span><span>★</span><span>★</span><span>★</span
+              ><span>★</span>
+            </div>
+          </div>
+          <button
+            id="sound-button"
+            class="icon-button"
+            aria-label="Enable sound"
+            title="Enable sound"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="m11 5-5 4H3v6h3l5 4V5Z"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              />
+              <path
+                id="sound-waves"
+                d="m16 9 5 6m0-6-5 6"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg></button
+          ><button
+            id="pause-button"
+            class="icon-button"
+            aria-label="Pause game"
+            title="Pause game (P)"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <rect x="7" y="5" width="3" height="14" rx="1" />
+              <rect x="14" y="5" width="3" height="14" rx="1" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <aside class="mission-card panel" aria-label="Current mission">
+        <div class="mission-eyebrow">
+          <span class="orange-dot"></span
+          ><span id="mission-count">STORY / 01</span
+          ><span class="mission-arrow">↗</span>
+        </div>
+        <h1 id="mission-title">Borrowed wheels</h1>
+        <p id="mission-text">
+          Every good story starts with a getaway. Find a ride and make your
+          first delivery.
+        </p>
+        <div class="mission-steps" aria-label="Mission progress">
+          <span class="mission-step active" data-step="0"
+            ><i>01</i><b>GET A RIDE</b></span
+          ><span class="step-line"></span
+          ><span class="mission-step" data-step="1"
+            ><i>02</i><b>LOSE HEAT</b></span
+          ><span class="step-line"></span
+          ><span class="mission-step" data-step="2"
+            ><i>03</i><b>DELIVER</b></span
+          >
+        </div>
+        <div class="mission-reward">
+          <span>FOLLOW THE <i></i> MARKER</span
+          ><strong
+            ><b id="mission-reward-amount">+$1,500</b>
+            <span>REWARD</span></strong
+          >
+        </div>
+      </aside>
+
+      <div class="world-caption" aria-hidden="true">
+        <span>WELCOME TO THE NEIGHBORHOOD</span
+        ><strong>A different kind of rush.</strong>
+      </div>
+
+      <aside class="map-card panel" aria-label="City map">
+        <div class="map-top">
+          <span><i class="orange-dot"></i> YOU ARE HERE</span
+          ><span class="map-compass">N ↑</span>
+        </div>
+        <canvas
+          id="minimap"
+          width="240"
+          height="186"
+          aria-label="Minimap showing your position, streets, and mission markers"
+        ></canvas>
+        <div class="map-footer">
+          <strong>VICE DISTRICT</strong><span>EXPLORE. DRIVE. DISAPPEAR.</span>
+        </div>
+      </aside>
+
+      <div class="bottom-status">
+        <div class="health-indicator">
+          <span class="health-icon" aria-hidden="true">✚</span>
+          <div class="health-track"><span id="health-fill"></span></div>
+          <span id="health-value">100</span>
+        </div>
+        <span class="status-edition"
+          >VD / VOL. 01 <span>—</span> SUNSET STORIES</span
+        >
+      </div>
+
+      <section class="speedometer" aria-label="Vehicle status">
+        <span class="speedometer-eyebrow" id="drive-status">ON FOOT</span>
+        <div class="speed-number">
+          <strong id="speed">000</strong><span>KM/H</span>
+        </div>
+        <div class="speedometer-rule"><i id="speed-progress"></i></div>
+        <span id="vehicle-name">THE STREETS ARE WAITING</span>
+      </section>
+
+      <aside class="controls-panel" aria-label="Game controls">
+        <div class="control-row">
+          <div class="key-group">
+            <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+          </div>
+          <span>Move / Drive</span>
+        </div>
+        <div class="control-row">
+          <kbd class="key-wide">SPACE</kbd><span>Handbrake</span>
+        </div>
+        <div class="control-row">
+          <kbd>E</kbd><span>Enter / Exit vehicle</span>
+        </div>
+        <button id="help-button" class="controls-help">
+          <span>?</span> ALL CONTROLS <span>↗</span>
+        </button>
+      </aside>
+
+      <div id="interaction-hint" class="interaction-hint">
+        <kbd>E</kbd><span id="interaction-text">ENTER A NEARBY VEHICLE</span>
+      </div>
+      <div
+        id="toast-region"
+        class="toast-region"
+        role="status"
+        aria-live="polite"
+        aria-atomic="false"
+      ></div>
+
+      <div class="touch-controls" aria-label="Touch controls">
+        <div class="touch-dpad">
+          <button data-control="w" class="touch-up" aria-label="Move forward">
+            ↑</button
+          ><button data-control="a" class="touch-left" aria-label="Turn left">
+            ←</button
+          ><button
+            data-control="s"
+            class="touch-down"
+            aria-label="Move backward"
+          >
+            ↓</button
+          ><button data-control="d" class="touch-right" aria-label="Turn right">
+            →
+          </button>
+        </div>
+        <div class="touch-actions">
+          <button id="interact-touch" aria-label="Enter or exit vehicle">
+            ENTER / EXIT</button
+          ><button data-control="space" aria-label="Handbrake">BRAKE</button>
+        </div>
+      </div>
+    </main>
+
+    <section
+      id="welcome-modal"
+      class="modal-backdrop welcome-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcome-title"
+    >
+      <div class="welcome-modal modal-card">
+        <div class="modal-eyebrow">
+          <span class="orange-dot"></span> WELCOME TO VICE DISTRICT
+          <span>01 / 01</span>
+        </div>
+        <p class="welcome-kicker">NO SCHEDULE. NO SPEED LIMIT.</p>
+        <h2 id="welcome-title">
+          The city<br />is <em>yours.</em><span>↗</span>
+        </h2>
+        <p class="welcome-copy">
+          Find a ride. Chase an opportunity. Take the long way home. Your next
+          story is just around the corner.
+        </p>
+        <div class="welcome-features">
+          <span><i>01</i> EXPLORE THE CITY</span
+          ><span><i>02</i> MAKE YOUR MONEY</span
+          ><span><i>03</i> LOSE THE HEAT</span>
+        </div>
+        <button id="start-button" class="primary-button">
+          HIT THE STREETS <span>↗</span>
+        </button>
+        <div class="welcome-footer">
+          <span><kbd>WASD</kbd> MOVE <kbd>E</kbd> ENTER A RIDE</span
+          ><span>BUILT FOR A LITTLE ESCAPE.</span>
+        </div>
+      </div>
+      <span class="welcome-corner">AN ORIGINAL OPEN-CITY EXPERIENCE</span>
+    </section>
+
+    <section
+      id="pause-modal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pause-title"
+    >
+      <div class="modal-card pause-card">
+        <div class="modal-eyebrow">
+          <span class="orange-dot"></span> TAKE A BREATHER
+        </div>
+        <h2 id="pause-title">The city<br />can wait.</h2>
+        <p>Your adventure is paused. Pick up right where you left off.</p>
+        <button id="resume-button" class="primary-button">
+          BACK TO THE STREETS <span>↗</span></button
+        ><button id="reset-button" class="secondary-button">
+          RECOVER AT GARAGE · $250
+        </button>
+        <p class="modal-footnote">Press P or Escape to resume</p>
+      </div>
+    </section>
+
+    <section
+      id="help-modal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="help-title"
+    >
+      <div class="modal-card help-card">
+        <div class="modal-eyebrow">
+          <span class="orange-dot"></span> THE STREET SMARTS<button
+            id="close-help"
+            class="close-button"
+            aria-label="Close controls"
+          >
+            ×
+          </button>
+        </div>
+        <h2 id="help-title">Know your way.</h2>
+        <dl class="help-controls">
+          <div>
+            <dt>
+              <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>↑</kbd
+              ><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd>
+            </dt>
+            <dd>Move on foot or drive your ride</dd>
+          </div>
+          <div>
+            <dt><kbd>E</kbd></dt>
+            <dd>Enter or exit a nearby vehicle</dd>
+          </div>
+          <div>
+            <dt><kbd>SPACE</kbd></dt>
+            <dd>Handbrake for tight corners</dd>
+          </div>
+          <div>
+            <dt><kbd>SHIFT</kbd></dt>
+            <dd>Sprint on foot / boost in a vehicle</dd>
+          </div>
+          <div>
+            <dt><kbd>P</kbd> / <kbd>ESC</kbd></dt>
+            <dd>Pause and take a breather</dd>
+          </div>
+          <div>
+            <dt><kbd>R</kbd></dt>
+            <dd>Recover at the garage · $250</dd>
+          </div>
+        </dl>
+        <p class="help-tip">
+          <strong>YOUR FIRST MOVE</strong> Walk up to a car and press E. Follow
+          the orange markers to complete jobs and earn cash. A little chaos
+          attracts the police — keep moving and stay out of sight to lose the
+          heat.
+        </p>
+        <button id="help-done" class="primary-button">
+          GOT IT. LET’S GO. <span>↗</span>
+        </button>
+      </div>
+    </section>
+
+    <section
+      id="result-modal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="result-title"
+    >
+      <div class="modal-card pause-card">
+        <div class="modal-eyebrow">
+          <span class="orange-dot"></span> A NEW CHAPTER
+        </div>
+        <h2 id="result-title">Back on<br />the streets.</h2>
+        <p id="result-body"></p>
+        <button id="result-done" class="primary-button">
+          KEEP EXPLORING <span>↗</span>
+        </button>
+      </div>
+    </section>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
