@@ -59,3 +59,7 @@ Watch your health and wanted stars. Recovery repairs your ride and clears the he
 Cash and completed-job count are saved to browser `localStorage`. Reloading resets the active session: player and vehicle positions, current mission stage, health, and police heat. Clearing browser storage removes saved progress. If browser storage is unavailable, the game remains playable without persistence.
 
 All city geometry and game models are generated in code; no external game assets are required. Optional Google Fonts enhance the interface when available, with system-font fallbacks. WebGL is required for the 3D scene; enable browser hardware acceleration if the city cannot initialize.
+
+## Play online
+
+[Play the hosted game](https://intrepion.github.io/kata-grand-theft-auto-astra-6-ultra/)
