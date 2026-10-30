@@ -44,8 +44,10 @@ try {
     powerPreference: "high-performance",
   });
 } catch {
+  const arcadeNavigation = document.querySelector('[data-kata-arcade-nav]');
   document.body.innerHTML =
     '<main style="padding:12vh 10vw;font:20px system-ui;background:#f7f4ea;min-height:100vh;color:#202d35"><h1>Vice District</h1><p>This city needs WebGL. Enable hardware acceleration in your browser, then reload to play.</p></main>';
+  if (arcadeNavigation) document.body.prepend(arcadeNavigation);
   throw new Error("WebGL is unavailable");
 }
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));

@@ -12,8 +12,14 @@
       content="A little city. A lot of possibility. Explore Vice District, an original open-city driving game."
     />
     <title>Vice District — The city is yours.</title>
-  </head>
+  <style>[data-kata-arcade-nav] a:focus-visible { outline: 3px solid #ffdf70 !important; outline-offset: 3px; }</style>
+</head>
   <body>
+    <style>@media (max-width: 600px) { [data-kata-arcade-nav] { bottom: 150px !important; } }</style>
+    <div role="navigation" aria-label="Arcade navigation" data-kata-arcade-nav style="all:initial;display:block;position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));z-index:2147483647;font:600 13px/1.3 system-ui,sans-serif;">
+      <a href="https://intrepion.github.io/" style="display:inline-block;margin:8px;padding:8px 12px;border:2px solid #fff;border-radius:6px;background:#17262a;color:#fff;text-decoration:underline;text-underline-offset:3px;box-shadow:0 1px 4px #0008;">← Kata Arcade</a>
+    </div>
+
     <canvas
       id="game"
       aria-label="Vice District third-person open city driving game"
