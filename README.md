@@ -63,3 +63,7 @@ All city geometry and game models are generated in code; no external game assets
 ## Play online
 
 [Play the hosted game](https://intrepion.github.io/kata-grand-theft-auto-astra-6-ultra/)
+
+## Arcade metadata
+
+See [docs/arcade-metadata.md](docs/arcade-metadata.md) for the game-owned manifest and screenshot provenance.

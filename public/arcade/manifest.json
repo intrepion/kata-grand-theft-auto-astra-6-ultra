@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "gameId": "kata-grand-theft-auto-astra-6-ultra",
+  "playUrl": "https://intrepion.github.io/kata-grand-theft-auto-astra-6-ultra/",
+  "screenshots": [
+    {
+      "path": "arcade/screenshots/view-01.jpg",
+      "sha256": "4e64d5e5a42ab52ff8c2f5f251b8616807ffe482d23d5497b36ea3533e86b6b5",
+      "alt": "Gameplay capture 1",
+      "provenance": {
+        "kind": "existing_repository_capture",
+        "sourcePath": "artifacts/gameplay.png",
+        "deployedBuild": null,
+        "captureDate": null
+      }
+    },
+    {
+      "path": "arcade/screenshots/view-02.jpg",
+      "sha256": "b11f89e16f0b95519a783dd7310d775a412270394c46920c7f1a7071c86416a8",
+      "alt": "Gameplay capture 2",
+      "provenance": {
+        "kind": "existing_repository_capture",
+        "sourcePath": "artifacts/driving.png",
+        "deployedBuild": null,
+        "captureDate": null
+      }
+    }
+  ]
+}
