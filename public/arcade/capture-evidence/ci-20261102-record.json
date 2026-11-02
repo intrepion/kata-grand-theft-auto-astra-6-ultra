@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "workflowCommit": "7674005b37c0c5c00e0f37ca533a3857a436d685",
+  "sourceCommit": "ce2d238dbefdd416dc9719fa91a86c9d6048325e",
+  "runId": "41421164321",
+  "url": "http://127.0.0.1:4253/",
+  "inputs": {
+    "index.html": "427c027afd2da9c35fb5197a3786cfdececc5bcb918b2c591b61940e58457ae9",
+    "assets/index-DDyMAyHN.css": "ebfbdc6e859be4d66e1c9fa9ec47680606a1e9d4aa2224aa4f35056e444658de",
+    "assets/index-DsNErB8I.js": "48814508c513975f61a469d673b0b004fe5fb4dc2f7551ca5ff1da5f28fdbdec",
+    "assets/three-BKq17naN.js": "1a0d83d55ba9a01a1cf055a8869d84e34bc90f0990b6c95abff6f8def53ba6f1"
+  },
+  "browser": "153.0.8010.12",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "screenshots": [
+    "vice-district-01.png",
+    "vice-district-02.png"
+  ]
+}

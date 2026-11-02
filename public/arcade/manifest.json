@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "gameId": "kata-grand-theft-auto-astra-6-ultra",
   "playUrl": "https://intrepion.github.io/kata-grand-theft-auto-astra-6-ultra/",
   "screenshots": [
@@ -23,6 +23,48 @@
         "sourcePath": "artifacts/driving.png",
         "deployedBuild": null,
         "captureDate": null
+      }
+    },
+    {
+      "path": "arcade/screenshots/ci-20261102-01.jpg",
+      "sha256": "82fca17b3be3647deb6fa6e792bdd7780238da5905108e829be5db9c5e26f5b8",
+      "alt": "Vice District gameplay, view 1",
+      "provenance": {
+        "kind": "ci_gameplay_capture",
+        "sourcePath": "arcade/capture-evidence/ci-20261102-01.png",
+        "sourceSha256": "1089e768b324c75bef4b941f8582abe1e69c30578dfee135bbe9ee5997d3e7ca",
+        "captureCommit": "ce2d238dbefdd416dc9719fa91a86c9d6048325e",
+        "workflowRunId": "41421164321",
+        "inputHashes": {
+          "index.html": "427c027afd2da9c35fb5197a3786cfdececc5bcb918b2c591b61940e58457ae9",
+          "assets/index-DDyMAyHN.css": "ebfbdc6e859be4d66e1c9fa9ec47680606a1e9d4aa2224aa4f35056e444658de",
+          "assets/index-DsNErB8I.js": "48814508c513975f61a469d673b0b004fe5fb4dc2f7551ca5ff1da5f28fdbdec",
+          "assets/three-BKq17naN.js": "1a0d83d55ba9a01a1cf055a8869d84e34bc90f0990b6c95abff6f8def53ba6f1"
+        },
+        "publishedFilesVerifiedAt": "2026-11-02T19:01:20Z",
+        "captureRecordPath": "arcade/capture-evidence/ci-20261102-record.json",
+        "captureRecordSha256": "b44c9aef2b7be311dd0f9b08c4980ff478b0e4e1c9384ec35acaa86f81f20d43"
+      }
+    },
+    {
+      "path": "arcade/screenshots/ci-20261102-02.jpg",
+      "sha256": "97287d112ea6f1dd8f35fb88a7bff1906dc9c39b8a2f41b427b197f7dedea9bc",
+      "alt": "Vice District gameplay, view 2",
+      "provenance": {
+        "kind": "ci_gameplay_capture",
+        "sourcePath": "arcade/capture-evidence/ci-20261102-02.png",
+        "sourceSha256": "131414b4c34f021189517bbca8794bc1f024939d068d3986f73a8bdf3ff51b96",
+        "captureCommit": "ce2d238dbefdd416dc9719fa91a86c9d6048325e",
+        "workflowRunId": "41421164321",
+        "inputHashes": {
+          "index.html": "427c027afd2da9c35fb5197a3786cfdececc5bcb918b2c591b61940e58457ae9",
+          "assets/index-DDyMAyHN.css": "ebfbdc6e859be4d66e1c9fa9ec47680606a1e9d4aa2224aa4f35056e444658de",
+          "assets/index-DsNErB8I.js": "48814508c513975f61a469d673b0b004fe5fb4dc2f7551ca5ff1da5f28fdbdec",
+          "assets/three-BKq17naN.js": "1a0d83d55ba9a01a1cf055a8869d84e34bc90f0990b6c95abff6f8def53ba6f1"
+        },
+        "publishedFilesVerifiedAt": "2026-11-02T19:01:20Z",
+        "captureRecordPath": "arcade/capture-evidence/ci-20261102-record.json",
+        "captureRecordSha256": "b44c9aef2b7be311dd0f9b08c4980ff478b0e4e1c9384ec35acaa86f81f20d43"
       }
     }
   ]
